@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>动态列表</title>
+</head>
+<body>
+    <div>
+        <div th:each="passage:${passages}">
+            <p th:text="'title:' + ${passage.getTitle()}"></p>
+            <p th:text=" 'content' + ${passage.getContent()}"></p>
+        </div>
+    </div>
+    <div>
+<!--        <a th:href="@{./}">好友</a>-->
+<!--        <a th:href="@{/post-passage}">发帖</a>-->
+<!--        <a th:href="@{/user}">个人界面</a>-->
+    </div>
+</body>
+</html>
