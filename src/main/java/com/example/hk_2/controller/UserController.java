@@ -1,47 +1,23 @@
 package com.example.hk_2.controller;
 
-import com.example.hk_2.dao.PassageRepository;
-import com.example.hk_2.dao.RelationRepository;
-import com.example.hk_2.dao.UserRepository;
-import com.example.hk_2.entities.Passage;
-import com.example.hk_2.entities.Relation;
-import com.example.hk_2.entities.User;
+import com.example.hk_2.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
-import org.springdoc.core.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
 
 @Controller
 public class UserController {
-    private UserRepository userRepository;
-    private PassageRepository passageRepository;
-    private RelationRepository relationRepository;
-
+    @Autowired
+    private UserService userService;
 //    @Bean
 //    public GroupedOpenApi storeOpenApi(){
 //        String paths[] = {"/users/**", "/user/**"};
 //        return GroupedOpenApi.builder().group("users").pathsToMatch(paths).build();
 //    }
-
-    @Autowired
-    public void setUserRepository(UserRepository userRepository){
-        this.userRepository = userRepository;
-    }
-    @Autowired
-    public void setPassageRepository(PassageRepository passageRepository) {
-        this.passageRepository = passageRepository;
-    }
-    @Autowired
-    public void setRelationRepository(RelationRepository relationRepository) {
-        this.relationRepository = relationRepository;
-    }
 
     @Operation(description = "获取特定用户信息")
     @GetMapping("/users/{id}")
@@ -107,40 +83,6 @@ public class UserController {
     @Operation(description = "获取特定的用户动态信息")
     @GetMapping("/user/{id}/blogs")
     public String getSpecificBlog(@PathVariable("id") long id){
-        return "";
-    }
-
-    @Operation(description = "")
-    @GetMapping("/users/{userId}/friends/blogs")
-    public String getSelfList(HttpServletRequest req,
-                          Model model,
-                          @PathVariable("userId") long id){
-//        List<Relation> relationList = relationRepository.findByAOrB(id, id);
-//        ArrayList<Long> friends = new ArrayList<>();
-//        friends.add(id);
-//        for (Relation r : relationList) {
-//            friends.add(r.getA()==id?r.getB():r.getA());
-//        }
-//        List<Passage> passageList = passageRepository.findByUserIn(friends);
-//        model.addAttribute("passages", passageList);
-//        model.addAttribute("user", id);
-//        return "index";
-        return "";
-    }
-    @Operation(description = "")
-    @GetMapping("/users/{userId}/friends")
-    public String getFriendList(HttpServletRequest req,
-                          Model model,
-                          @PathVariable("userId") long id){
-//        List<Relation> relationList = relationRepository.findByAOrB(id, id);
-//        ArrayList<Long> friends = new ArrayList<>();
-//        friends.add(id);
-//        for (Relation r : relationList) {
-//            friends.add(r.getA()==id?r.getB():r.getA());
-//        }
-//        List<User> friendList = userRepository.findByIdIn(friends);
-//        model.addAttribute("friends", friendList);
-//        return "friend";
         return "";
     }
 }

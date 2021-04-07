@@ -2,6 +2,7 @@ package com.example.hk_2.controller;
 
 import com.example.hk_2.dao.UserRepository;
 import com.example.hk_2.entities.User;
+import com.example.hk_2.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -15,12 +16,8 @@ import java.util.List;
 
 @Controller
 public class LogSignController {
-    private UserRepository userRepository;
-
     @Autowired
-    public void setUserRepository(UserRepository userRepository){
-        this.userRepository = userRepository;
-    }
+    private UserService userService;
 
     @Operation(description = "用户登录")
     @GetMapping("/users")
