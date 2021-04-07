@@ -10,4 +10,6 @@ public interface RelationRepository extends JpaRepository<Relation, Long> {
     List<Relation> findByA(long a);
     List<Relation> findByB(long b);
     List<Relation> findByAOrB(long sb1, long sb2);
+    List<Relation> findByAAndB(long sb1, long sb2);
+    boolean existsByAAndB(long a, long b);
 }

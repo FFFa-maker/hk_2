@@ -1,146 +1,131 @@
 package com.example.hk_2.controller;
 
-import com.example.hk_2.dao.PassageRepository;
-import com.example.hk_2.dao.RelationRepository;
-import com.example.hk_2.dao.UserRepository;
+import com.example.hk_2.advice.UserException;
 import com.example.hk_2.entities.Passage;
-import com.example.hk_2.entities.Relation;
 import com.example.hk_2.entities.User;
+import com.example.hk_2.service.UserService;
+import com.fasterxml.jackson.annotation.JsonView;
+import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.annotations.Operation;
-import org.springdoc.core.GroupedOpenApi;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
+import java.net.http.HttpRequest;
 import java.util.List;
 
-@Controller
+@RestController
 public class UserController {
-    private UserRepository userRepository;
-    private PassageRepository passageRepository;
-    private RelationRepository relationRepository;
-
-//    @Bean
-//    public GroupedOpenApi storeOpenApi(){
-//        String paths[] = {"/users/**", "/user/**"};
-//        return GroupedOpenApi.builder().group("users").pathsToMatch(paths).build();
-//    }
-
     @Autowired
-    public void setUserRepository(UserRepository userRepository){
-        this.userRepository = userRepository;
-    }
-    @Autowired
-    public void setPassageRepository(PassageRepository passageRepository) {
-        this.passageRepository = passageRepository;
-    }
-    @Autowired
-    public void setRelationRepository(RelationRepository relationRepository) {
-        this.relationRepository = relationRepository;
-    }
+    private UserService userService;
 
     @Operation(description = "获取特定用户信息")
     @GetMapping("/users/{id}")
-    public String getUser(@PathVariable("id") long id){
-        return "";
+    @JsonView(User.UserInfo.class)
+    public User getUser(@PathVariable("id") long id){
+        User u = userService.getUserById(id);
+        return u;
     }
 
     @Operation(description = "更新用户信息")
     @PutMapping("/users/{id}")
-    public String putUser(@PathVariable("id") long id){
-        return "";
+    @JsonView(User.UserPassword.class)
+    public User putUser(HttpServletRequest req,
+                          @PathVariable("id") long id,
+                          @RequestParam("name") String name,
+                          @RequestParam("name") String password){
+        //id在登录之后进行修改，修改时id只需要判断是否一致即可
+        if(Long.parseLong(req.getSession().getAttribute("user").toString())==id){
+            User u = userService.setUserById(id, name, password);
+            return u;
+        }
+        throw new UserException("登录与修改用户不匹配");
     }
 
     @Operation(description = "删除用户信息")
     @DeleteMapping("/users/{id}")
-    public String deleteUser(@PathVariable("id") long id){
-        return "";
+    public String deleteUser(HttpServletRequest req,
+                           @PathVariable("id") long id){
+        if(Long.parseLong(req.getSession().getAttribute("user").toString())==id){
+            userService.deleteUserById(id);
+            req.getSession().removeAttribute("user");
+            return "用户注销成功";
+        }
+        throw new UserException("登录与注销用户不匹配");
     }
 
-    @Operation(description = "获取当前用户的好友列表")
+    @Operation(description = "获取当前用户的好友列表, 返回两个列表，第一个是粉丝列表，第二个是关注列表")
     @GetMapping("/users/{id}/friends")
-    public String getFriendsList(@PathVariable("id") long id){
-        return "";
+    @JsonView(User.UserInfo.class)
+    public List<List> getFriendsList(HttpServletRequest req,
+                                     @PathVariable("id") long id){
+//        if(Long.parseLong(req.getSession().getAttribute("user").toString())==id){
+            List<List> users = userService.getFriends(id);
+            return users;
+//        }
+//        throw new UserException("登录用户不匹配");
     }
 
-    @Operation(description = "添加好友")
+    @Operation(description = "添加好友，关注")
     @PostMapping("/user/{id}/friends")
-    public String addFriends(@PathVariable("id") long id){
-        return "";
+    @JsonView(User.UserInfo.class)
+    public String addFriends(HttpServletRequest req,
+                             @PathVariable("id") long friendId){
+        Long userId = Long.parseLong(req.getSession().getAttribute("user").toString());
+        userService.addFriends(userId, friendId);
+        return "200:添加成功";
     }
 
-    @Operation(description = "删除好友")
-    @DeleteMapping("/users/{id1}/friends/{id2}")
-    public String deleteFriends(@PathVariable("id1") long userId,
-                                @PathVariable("id2") long friendId){
-        return "";
+    @Operation(description = "删除好友，取消关注")
+    @DeleteMapping("/users/{id}/friends")
+    public String deleteFriends(HttpServletRequest req,
+                                @PathVariable("id") long friendId){
+        Long userId = Long.parseLong(req.getSession().getAttribute("user").toString());
+        userService.deleteFriends(userId, friendId);
+        return "200:取消关注";
     }
 
     @Operation(description = "发表动态信息")
     @PostMapping("/blogs")
-    public String postBlog(){
-        return "";
+//    @JsonView(Passage.PassageInfo.class)
+    public Passage postBlog(HttpServletRequest req,
+                            @RequestBody Passage passage){
+        long id = Long.parseLong(req.getSession().getAttribute("user").toString());
+        userService.postBlog(id, passage);
+        return passage;
     }
 
     @Operation(description = "删除动态信息")
     @DeleteMapping("/blogs/{id}")
-    public String deleteBlog(@PathVariable("id") long id){
-        return "";
+    public String deleteBlog(HttpServletRequest req,
+                             @PathVariable("id") long id){
+        long userId = Long.parseLong(req.getSession().getAttribute("user").toString());
+        userService.deleteBlog(userId, id);
+        return "成功删除该文章";
     }
 
     @Operation(description = "编辑动态信息")
     @PutMapping("/blogs/{id}")
-    public String changeBlog(@PathVariable("id") long id){
-        return "";
+    public String changeBlog(HttpServletRequest req,
+                             @PathVariable("id") long id,
+                             @RequestBody Passage p){
+        long userId = Long.parseLong(req.getSession().getAttribute("user").toString());
+        userService.putBlog(userId, id, p);
+        return "成功修改该文章";
     }
 
     @Operation(description = "获取好友的动态列表")
-    @GetMapping("/users/{id}/friends/blogs")
-    public String getFriendBlog(@PathVariable("id") long id){
-        return "";
+    @GetMapping("/users/friends/blogs")
+    public List<Passage> getFriendBlog(HttpServletRequest req){
+        long userId = Long.parseLong(req.getSession().getAttribute("user").toString());
+        return userService.getFriendBlog(userId);
     }
 
     @Operation(description = "获取特定的用户动态信息")
     @GetMapping("/user/{id}/blogs")
-    public String getSpecificBlog(@PathVariable("id") long id){
-        return "";
-    }
-
-    @Operation(description = "")
-    @GetMapping("/users/{userId}/friends/blogs")
-    public String getSelfList(HttpServletRequest req,
-                          Model model,
-                          @PathVariable("userId") long id){
-//        List<Relation> relationList = relationRepository.findByAOrB(id, id);
-//        ArrayList<Long> friends = new ArrayList<>();
-//        friends.add(id);
-//        for (Relation r : relationList) {
-//            friends.add(r.getA()==id?r.getB():r.getA());
-//        }
-//        List<Passage> passageList = passageRepository.findByUserIn(friends);
-//        model.addAttribute("passages", passageList);
-//        model.addAttribute("user", id);
-//        return "index";
-        return "";
-    }
-    @Operation(description = "")
-    @GetMapping("/users/{userId}/friends")
-    public String getFriendList(HttpServletRequest req,
-                          Model model,
-                          @PathVariable("userId") long id){
-//        List<Relation> relationList = relationRepository.findByAOrB(id, id);
-//        ArrayList<Long> friends = new ArrayList<>();
-//        friends.add(id);
-//        for (Relation r : relationList) {
-//            friends.add(r.getA()==id?r.getB():r.getA());
-//        }
-//        List<User> friendList = userRepository.findByIdIn(friends);
-//        model.addAttribute("friends", friendList);
-//        return "friend";
-        return "";
+    public List<Passage> getSpecificBlog(@PathVariable("id") long id){
+        return userService.getSpecificBlog(id);
     }
 }
