@@ -2,6 +2,7 @@ package com.example.hk_2.controller;
 
 import com.example.hk_2.dao.UserRepository;
 import com.example.hk_2.entities.User;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,11 +22,8 @@ public class LogSignController {
         this.userRepository = userRepository;
     }
 
-    @GetMapping("/")
-    public String log(){
-        return "login";
-    }
-    @GetMapping("/login")
+    @Operation(description = "用户登录")
+    @GetMapping("/users")
     public String login(HttpServletRequest req,
                         Model model,
                         @RequestParam("name") String name,
@@ -45,15 +43,12 @@ public class LogSignController {
 //            }
 //        }
 //        model.addAttribute("result", "用户不存在");
-        return "login";
+//        return "login";
+        return "";
     }
 
-    @GetMapping("/sign")
-    public String getSign(){
-        return "sign";
-    }
-
-    @PostMapping("/sign")
+    @Operation(description = "用户注册")
+    @PostMapping("/users")
     public String postSign(HttpServletRequest req,
                        Model model,
                        @RequestParam("name") String name,
@@ -65,6 +60,7 @@ public class LogSignController {
 //            return "login";
 //        }
 //        model.addAttribute("result", "该名称已被注册");
-        return "sign";
+//        return "sign";
+        return "";
     }
 }
